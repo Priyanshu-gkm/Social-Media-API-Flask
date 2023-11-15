@@ -11,12 +11,13 @@ ma = Marshmallow()
 
 auth = HTTPBasicAuth()
 
-def create_app():
+db_uri = f'postgresql://{os.environ.get("POSTGRES_USERNAME")}:{os.environ.get("PASSWORD")}@{os.environ.get("HOST")}/{os.environ.get("DB_NAME")}'
+def create_app(db_uri=db_uri):
     """Construct the core application."""
     app = Flask(__name__)
     # Configs
     app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{os.environ.get("POSTGRES_USERNAME")}:{os.environ.get("PASSWORD")}@{os.environ.get("HOST")}/{os.environ.get("DB_NAME")}'
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
     app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # For not complaining in the console
     app.wsgi_app = DispatcherMiddleware(app.wsgi_app,{"/api":app})
