@@ -1,9 +1,8 @@
-from .. import db, ma
+from .. import db
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime as dt
-from application.models import User
-from marshmallow import fields
+
 
 
 class Notification(db.Model):
@@ -14,7 +13,7 @@ class Notification(db.Model):
         default=uuid.uuid4,
         unique=True,
         nullable=False,
-    )  # Private id
+    ) 
     user = db.Column(UUID(as_uuid=True), db.ForeignKey("user.id"))
     msg = db.Column(db.String(500))
     read = db.Column(db.Boolean, default=False, nullable=False)
@@ -27,15 +26,4 @@ class Notification(db.Model):
         self.published_at = dt.now()
 
 
-class NotificationSchema(ma.Schema):
-    user = fields.Method("get_user")
 
-    def get_user(self, obj):
-        return User.query.filter_by(id=obj.user).first().username
-
-    class Meta:
-        fields = ["id", "user", "msg", "read", "published_at"]
-
-
-notification_schema = NotificationSchema()
-notifications_schema = NotificationSchema(many=True)

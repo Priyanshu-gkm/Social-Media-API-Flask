@@ -4,12 +4,10 @@ from flask_marshmallow import Marshmallow
 import os
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from flask_migrate import Migrate
-from flask_httpauth import HTTPBasicAuth
+
 
 db = SQLAlchemy()
 ma = Marshmallow()
-
-auth = HTTPBasicAuth()
 
 db_uri = f'postgresql://{os.environ.get("POSTGRES_USERNAME")}:{os.environ.get("PASSWORD")}@{os.environ.get("HOST")}/{os.environ.get("DB_NAME")}'
 def create_app(db_uri=db_uri):
@@ -27,6 +25,6 @@ def create_app(db_uri=db_uri):
     ma.init_app(app)
 
     with app.app_context():
-        from . import resources  # Import routes
+        from . import views  # Import routes
         db.create_all()  # Create sql tables for our data models
     return app

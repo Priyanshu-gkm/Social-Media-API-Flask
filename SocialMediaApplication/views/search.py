@@ -1,11 +1,6 @@
-from ..models import (
-    User,
-    user_schema,
-    Post,
-    posts_schema,
-)
+from ..models import User, Post
+from ..serializers import user_schema, posts_schema
 from flask import jsonify, make_response, request, current_app as app
-from .permissions import authenticate_user
 
 
 @app.route("/search", methods=["GET"])
@@ -17,11 +12,11 @@ def search():
             if user:
                 data = user_schema.dump(user)
                 data.pop("email")
-                responseObject = {"user": data}
-                return make_response(jsonify(responseObject)), 200
+                response_object = {"user": data}
+                return make_response(jsonify(response_object)), 200
             else:
-                responseObject = {"error": "no such user"}
-                return make_response(jsonify(responseObject)), 400
+                response_object = {"error": "no such user"}
+                return make_response(jsonify(response_object)), 400
         elif request.args.get("tag"):
             tag = request.args.get("tag")
             posts = Post.query.filter(Post.tags.like("%" + tag + "%")).all()
@@ -29,8 +24,8 @@ def search():
                 data = posts_schema.dump(posts)
                 return jsonify(data), 200
             else:
-                responseObject = {"error": "no posts by such tag"}
-                return make_response(jsonify(responseObject)), 400
+                response_object = {"error": "no posts by such tag"}
+                return make_response(jsonify(response_object)), 400
         elif request.args.get("post"):
             title = request.args.get("post")
             posts = Post.query.filter(Post.title == title).all()
@@ -38,11 +33,11 @@ def search():
                 data = posts_schema.dump(posts)
                 return jsonify(data), 200
             else:
-                responseObject = {"error": "no posts by this title"}
-                return make_response(jsonify(responseObject)), 400
+                response_object = {"error": "no posts by this title"}
+                return make_response(jsonify(response_object)), 400
         else:
-            responseObject = {"error": "incorrect search parameters"}
-            return jsonify(responseObject), 400
+            response_object = {"error": "incorrect search parameters"}
+            return jsonify(response_object), 400
     except Exception as e:
-        responseObject = {"status": "fail", "message": str(e)}
-        return make_response(jsonify(responseObject)), 400
+        response_object = {"status": "fail", "message": str(e)}
+        return make_response(jsonify(response_object)), 400

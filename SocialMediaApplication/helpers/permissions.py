@@ -13,9 +13,6 @@ def authenticate_user(f):
 
             # Extract the token from the Authorization header
             auth_header = request.headers.get("Authorization")
-            # In a real-world scenario, you would validate the token here
-
-            # For simplicity, let's assume a basic token validation
             # Extract the token value
             token = auth_header.split(" ")[1]
 

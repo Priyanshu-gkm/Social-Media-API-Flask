@@ -1,6 +1,6 @@
 import unittest
 import os
-from application import create_app, db
+from SocialMediaApplication import create_app, db
 from sqlalchemy.sql import text
 
 
@@ -8,8 +8,9 @@ def app():
     db_uri = f'postgresql://{os.environ.get("POSTGRES_USERNAME")}:{os.environ.get("PASSWORD")}@{os.environ.get("HOST")}/social_media_test'
     app = create_app(db_uri=db_uri)
     with app.app_context():
-        from .. import resources
-
+        from .. import views
+        from .. import models
+        from .. import serializers
         db.create_all()
     return app
 
@@ -159,6 +160,7 @@ class Test_user_ops_post_login(unittest.TestCase):
 
     def test_update_user_delete(self):
         # try:
+        # print(self.user_id)
         response = self.client.delete(
             f"/users/{self.user_id}", headers={"Authorization": "Token " + self.token}
         )

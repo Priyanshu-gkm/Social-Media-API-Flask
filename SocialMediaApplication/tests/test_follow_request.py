@@ -1,6 +1,6 @@
 import unittest
 import os
-from application import create_app, db
+from SocialMediaApplication import create_app, db
 from sqlalchemy.sql import text
 
 
@@ -8,8 +8,9 @@ def app():
     db_uri = f'postgresql://{os.environ.get("POSTGRES_USERNAME")}:{os.environ.get("PASSWORD")}@{os.environ.get("HOST")}/social_media_test'
     app = create_app(db_uri=db_uri)
     with app.app_context():
-        from .. import resources
-
+        from .. import views
+        from .. import models
+        from .. import serializers
         db.create_all()
     return app
 
@@ -118,20 +119,20 @@ class TestFollow(unittest.TestCase):
     def test_follow_request_send_1_2_and_notifications(self):
         data = {"user": "testuser2"}
         response = self.client.post(
-            "/follow", headers={"Authorization": "Token " + self.token1}, json=data
+            "/follow-requests", headers={"Authorization": "Token " + self.token1}, json=data
         )
-        # print(response.json)
+        # print(response.__dict__)
         self.assertEqual(response.status_code, 201)
 
         response = self.client.get(
-            "/notification", headers={"Authorization": "Token " + self.token2}
+            "/notifications", headers={"Authorization": "Token " + self.token2}
         )
         # print(response.json)
         self.assertEqual(response.status_code, 200)
 
     def test_get_follow_requests_accept(self):
         response = self.client.get(
-            "/follow", headers={"Authorization": "Token " + self.token2}
+            "/follow-requests", headers={"Authorization": "Token " + self.token2}
         )
         # print(response.json)
         self.assertEqual(response.status_code, 200)
@@ -139,7 +140,7 @@ class TestFollow(unittest.TestCase):
         follow_request_id = response.json["message"][0]["id"]
         data = {"response": "accept"}
         response = self.client.patch(
-            f"/follow/{follow_request_id}",
+            f"/follow-requests/{follow_request_id}",
             headers={"Authorization": "Token " + self.token2},
             json=data,
         )
@@ -147,7 +148,7 @@ class TestFollow(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(
-            "/notification", headers={"Authorization": "Token " + self.token1}
+            "/notifications", headers={"Authorization": "Token " + self.token1}
         )
         # print(response.json)
         self.assertEqual(response.status_code, 200)
@@ -210,16 +211,13 @@ class TestFollow(unittest.TestCase):
         # print(response.json)
         self.assertEqual(response.status_code, 200)
 
-        # unfollow
         response = self.client.get(
-            "/connections", headers={"Authorization": "Token " + self.token1}
+            "/connections", headers={"Authorization": "Token " + self.token2}
         )
-        # print(response.json)
         self.assertEqual(response.status_code, 200)
-
         follow_request_id = response.json["message"][0]["id"]
         response = self.client.delete(
-            f"/follow/{follow_request_id}",
+            f"/follow-requests/{follow_request_id}",
             headers={"Authorization": "Token " + self.token1},
         )
         # print(response.__dict__)

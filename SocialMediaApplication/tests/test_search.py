@@ -1,6 +1,6 @@
 import unittest
 import os
-from application import create_app, db
+from SocialMediaApplication import create_app, db
 from sqlalchemy.sql import text
 
 
@@ -8,8 +8,9 @@ def app():
     db_uri = f'postgresql://{os.environ.get("POSTGRES_USERNAME")}:{os.environ.get("PASSWORD")}@{os.environ.get("HOST")}/social_media_test'
     app = create_app(db_uri=db_uri)
     with app.app_context():
-        from .. import resources
-
+        from .. import views
+        from .. import models
+        from .. import serializers
         db.create_all()
     return app
 
