@@ -1,6 +1,7 @@
-from social_media_application.models import User
 from marshmallow import fields
-from .. import  ma
+
+from social_media_application import ma
+from social_media_application.models import User
 
 class ConnectionSchema(ma.Schema):
     sender = fields.Method("get_sender")

@@ -1,6 +1,8 @@
-from functools import wraps
 from flask import request, jsonify
-from ..models import User, Post
+
+from functools import wraps
+
+from social_media_application.models import User, Post
 
 
 def authenticate_user(f):
@@ -10,6 +12,7 @@ def authenticate_user(f):
             # Check if Authorization header is present in the request
             if "Authorization" not in request.headers.keys():
                 return jsonify({"error": "Unauthenticated"}), 401
+                
 
             # Extract the token from the Authorization header
             auth_header = request.headers.get("Authorization")
@@ -17,10 +20,10 @@ def authenticate_user(f):
             token = auth_header.split(" ")[1]
 
             if token:
-                resp = User.verify_auth_token(token)
-                if User.query.filter_by(username=resp).first():
+                username = User.verify_auth_token(token)
+                if User.query.filter_by(username=username).first():
                     # If the token is valid, proceed with the original function
-                    kwargs["current_user"] = User.query.filter_by(username=resp).first()
+                    kwargs["current_user"] = User.query.filter_by(username=username).first()
                     return f(*args, **kwargs)
                 else:
                     return jsonify({"error": "Unauthenticated"}), 401

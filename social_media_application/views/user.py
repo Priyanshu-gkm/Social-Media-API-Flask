@@ -1,7 +1,9 @@
 from flask import request, jsonify, make_response
 from flask import current_app as app
+
 from sqlalchemy import or_
-from ..models import (
+
+from social_media_application.models import (
     db,
     User,
     Profile,
@@ -9,8 +11,8 @@ from ..models import (
     Post,
     Connection,
 )
-from ..serializers import user_schema, users_schema
-from ..helpers.permissions import authenticate_user, is_owner
+from social_media_application.serializers import user_schema, users_schema
+from social_media_application.helpers.permissions import authenticate_user, is_owner
 
 
 @app.route("/users", methods=["GET"])

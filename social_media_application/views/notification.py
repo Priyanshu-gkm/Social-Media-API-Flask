@@ -1,8 +1,9 @@
 from flask import jsonify, make_response
 from flask import current_app as app
-from ..models import db, Notification
-from ..serializers import notifications_schema
-from ..helpers.permissions import authenticate_user
+
+from social_media_application.models import db, Notification
+from social_media_application.serializers import notifications_schema
+from social_media_application.helpers.permissions import authenticate_user
 
 
 @app.route("/notifications", methods=["GET"])
@@ -13,14 +14,14 @@ def get_all_notifications(**kwargs):
         if user:
             notifications = Notification.query.filter_by(user=user.id).all()
             notifications_object = notifications_schema.dump(notifications)
-            responseObject = {"status": "success", "message": notifications_object}
-            return make_response(jsonify(responseObject)), 200
+            response_object = notifications_object
+            return make_response(jsonify(response_object)), 200
         else:
-            responseObject = {"status": "Fail", "message": "no such user!"}
-            return make_response(jsonify(responseObject)), 400
+            response_object = {"error": "user not found"}
+            return make_response(jsonify(response_object)), 400
     except Exception as e:
-        responseObject = {"status": "Fail", "message": str(e)}
-        return make_response(jsonify(responseObject)), 400
+        response_object = {"error": str(e)}
+        return make_response(jsonify(response_object)), 400
 
 
 @app.route("/notifications/<id>", methods=["PUT", "PATCH"])
@@ -33,23 +34,21 @@ def mark_read_notification(id, **kwargs):
             if notification.user == user.id:
                 setattr(notification, "read", True)
                 db.session.commit()
-                responseObject = {
-                    "status": "success",
-                    "message": "notification mark as read",
+                response_object = {
+                    "message": "notification mark as read"
                 }
-                return make_response(jsonify(responseObject)), 200
+                return make_response(jsonify(response_object)), 200
             else:
-                responseObject = {
-                    "status": "Fail",
-                    "message": "This notification does not belongs to you",
+                response_object = {
+                    "error": "This notification does not belongs to you",
                 }
-                return make_response(jsonify(responseObject)), 400
+                return make_response(jsonify(response_object)), 400
         else:
-            responseObject = {"status": "Fail", "message": "no such user!"}
-            return make_response(jsonify(responseObject)), 400
+            response_object = { "error": "user not found"}
+            return make_response(jsonify(response_object)), 400
     except Exception as e:
-        responseObject = {"status": "Fail", "message": str(e)}
-        return make_response(jsonify(responseObject)), 400
+        response_object = {"error": str(e)}
+        return make_response(jsonify(response_object)), 400
 
 
 @app.route("/notifications", methods=["PUT", "PATCH"])
@@ -64,43 +63,13 @@ def mark_all_notifications_as_read(**kwargs):
                 if notification.user == user.id:
                     setattr(notification, "read", True)
                     db.session.commit()
-            responseObject = {
-                "status": "success",
-                "message": "notifications marked as read",
+            response_object = {
+                "message": "notifications marked as read"
             }
-            return make_response(jsonify(responseObject)), 200
+            return make_response(jsonify(response_object)), 200
         else:
-            responseObject = {"status": "Fail", "message": "no such user!"}
-            return make_response(jsonify(responseObject)), 400
+            response_object = {"error": "user not found"}
+            return make_response(jsonify(response_object)), 400
     except Exception as e:
-        responseObject = {"status": "Fail", "message": str(e)}
-        return make_response(jsonify(responseObject)), 400
-
-
-# @app.route("/notifications/<id>", methods=["DELETE"])
-# @authenticate_user
-# def delete_read_notification(**kwargs):
-#     try:
-#         user = kwargs.get("current_user")
-#         if user:
-#             notification = Notification.query.filter_by(id=id)
-#             if notification.user == user.id:
-#                 notification.delete()
-#                 db.session.commit()
-#                 responseObject = {
-#                     "status": "success",
-#                     "message": "notification deleted!",
-#                 }
-#                 return make_response(jsonify(responseObject)), 204
-#             else:
-#                 responseObject = {
-#                     "status": "Fail",
-#                     "message": "This notification does not belongs to you",
-#                 }
-#                 return make_response(jsonify(responseObject)), 400
-#         else:
-#             responseObject = {"status": "Fail", "message": "no such user!"}
-#             return make_response(jsonify(responseObject)), 400
-#     except Exception as e:
-#         responseObject = {"status": "Fail", "message": str(e)}
-#         return make_response(jsonify(responseObject)), 400
+        response_object = {"message": str(e)}
+        return make_response(jsonify(response_object)), 400

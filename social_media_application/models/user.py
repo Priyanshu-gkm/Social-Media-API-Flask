@@ -1,13 +1,14 @@
 from flask import current_app as app
-from social_media_application.models.token import BlacklistToken
-from .. import db
+
+import jwt 
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
 from passlib.hash import bcrypt
 from datetime import timedelta as td  
 from datetime import datetime as dt
-import jwt 
 
+from social_media_application import db
+from social_media_application.models.token import BlacklistToken
 
 class User(db.Model):
     __tablename__ = "user"

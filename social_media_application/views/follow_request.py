@@ -1,8 +1,9 @@
 from flask import request, jsonify, make_response
 from flask import current_app as app
-from ..models import db, User, Connection, Notification
-from ..serializers import connection_schema,connections_schema
-from ..helpers.permissions import authenticate_user
+
+from social_media_application.models import db, User, Connection, Notification
+from social_media_application.serializers import  connections_schema
+from social_media_application.helpers.permissions import authenticate_user
 
 
 @app.route("/follow-requests", methods=["GET"])
@@ -14,24 +15,23 @@ def get_my_follow_requests(**kwargs):
             follow_requests = Connection.query.filter_by(
                 receiver=user.id, accepted=False
             ).all()
+
             if len(follow_requests) == 0:
-                response_object = {
-                    "status": "success",
-                    "message": "no requests for {}".format(user.username),
-                }
+                response_object = {}
                 return make_response(jsonify(response_object)), 200
+
             follow_requests = connections_schema.dump(follow_requests)
             for follow_request in follow_requests:
                 follow_request.pop("receiver")
                 follow_request["user"] = follow_request.pop("sender")
-            response_object = {"status": "success", "message": follow_requests}
+            response_object = follow_requests
             return make_response(jsonify(response_object)), 200
 
         else:
-            response_object = {"status": "Fail", "message": "user not found"}
+            response_object = {"error": "user not found"}
             return make_response(jsonify(response_object)), 400
     except Exception as e:
-        response_object = {"status": "Fail", "message": str(e)}
+        response_object = {"error": str(e)}
         return make_response(jsonify(response_object)), 400
 
 
@@ -45,21 +45,19 @@ def follow(**kwargs):
         receiver = User.query.filter_by(username=user).first()
         if receiver:
             if user == sender.username:
-                response_object = {
-                    "status": "Fail",
-                    "message": "You can't send follow request to yourself",
-                }
+                response_object = {"error": "You can't send follow request to yourself"}
                 return make_response(jsonify(response_object)), 400
             elif (
-                Connection.query.filter_by(sender=sender.id, receiver=receiver.id).first()
-                or Connection.query.filter_by(sender=receiver.id, receiver=sender.id).first()
+                Connection.query.filter_by(
+                    sender=sender.id, receiver=receiver.id
+                ).first()
+                or Connection.query.filter_by(
+                    sender=receiver.id, receiver=sender.id
+                ).first()
             ):
-                response_object = {
-                    "status": "Success",
-                    "message": "connection already exists",
-                }
-                return make_response(jsonify(response_object)), 200
-            
+                response_object = {"error": "connection already exists"}
+                return make_response(jsonify(response_object)), 400
+
             follow_request = Connection(sender=sender.id, receiver=receiver.id)
             db.session.add(follow_request)
             db.session.commit()
@@ -70,19 +68,14 @@ def follow(**kwargs):
             db.session.add(notification_object)
             db.session.commit()
             response_object = {
-                "status": "Success",
                 "message": "Follow request sent to {}".format(receiver.username),
-                "data": connection_schema.dump(follow_request),
             }
-            return make_response(jsonify(response_object)), 201
+            return make_response(jsonify(response_object)), 200
         else:
-            response_object = {
-                "status": "Fail",
-                "message": "unknown username {}".format(user),
-            }
+            response_object = {"error": "unknown username {}".format(user)}
             return make_response(jsonify(response_object)), 400
     except Exception as e:
-        response_object = {"status": "Fail", "message": str(e)}
+        response_object = {"error": str(e)}
         return make_response(jsonify(response_object)), 400
 
 
@@ -95,8 +88,7 @@ def respond_to_follow_request(id, **kwargs):
         if follow_request.receiver == user.id:
             if follow_request.accepted == True:
                 response_object = {
-                    "status": "Fail",
-                    "message": "you cant do this, already accepted!",
+                    "error": "you cant do this, already accepted!",
                 }
                 return make_response(jsonify(response_object)), 400
             else:
@@ -124,38 +116,9 @@ def respond_to_follow_request(id, **kwargs):
                     return make_response(jsonify(response_object)), 200
         else:
             response_object = {
-                "status": "Fail",
-                "message": "you are not authorised for this follow request!",
+                "error": "you are not authorised for this follow request!"
             }
-            return make_response(jsonify(response_object)), 400
+            return make_response(jsonify(response_object)), 403
     except Exception as e:
-        response_object = {"status": "Fail", "message": str(e)}
+        response_object = {"error": str(e)}
         return make_response(jsonify(response_object)), 400
-
-
-@app.route("/follow-requests/<id>", methods=["DELETE"])
-@authenticate_user
-def unfollow(id, **kwargs):
-    try:
-        user = kwargs.get("current_user")
-        connection = Connection.query.filter_by(id=id).first()
-        if connection:
-            if connection.sender == user.id or connection.receiver == user.id:
-                Connection.query.filter_by(id=id).delete()
-                db.session.commit()
-                response_object = {"status": "success", "message": "connection deleted"}
-                return make_response(jsonify(response_object)), 204
-            else:
-                response_object = {
-                    "status": "Fail",
-                    "message": "you are not authorised!",
-                }
-                return make_response(jsonify(response_object)), 403
-        else:
-            response_object = {"status": "Fail", "message": "no such connection exists!"}
-            return make_response(jsonify(response_object)), 400
-    except Exception as e:
-        response_object = {"status": "Fail", "message": str(e)}
-        return make_response(jsonify(response_object)), 400
-
-

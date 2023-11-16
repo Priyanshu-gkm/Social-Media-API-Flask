@@ -1,16 +1,17 @@
 import unittest
 import os
-from social_media_application import create_app, db
 from sqlalchemy.sql import text
+
+from social_media_application import create_app, db
 
 
 def app():
     db_uri = f'postgresql://{os.environ.get("POSTGRES_USERNAME")}:{os.environ.get("PASSWORD")}@{os.environ.get("HOST")}/social_media_test'
     app = create_app(db_uri=db_uri)
     with app.app_context():
-        from .. import views
-        from .. import models
-        from .. import serializers
+        from social_media_application import views
+        from social_media_application import models
+        from social_media_application import serializers
         db.create_all()
     return app
 
@@ -36,13 +37,13 @@ class TestPosts(unittest.TestCase):
             },
             content_type="application/json",
         )
-        self.user1_id = response.json["message"]["id"]
-        self.username1 = response.json["message"]["username"]
+        self.user1_id = response.json["id"]
+        self.username1 = response.json["username"]
 
         response = self.client.post(
             "/login",
             json={
-                "username": "testuser1",
+                "username": self.username1,
                 "password": "Test@Abcd",
             },
             content_type="application/json",
@@ -62,13 +63,13 @@ class TestPosts(unittest.TestCase):
             },
             content_type="application/json",
         )
-        self.user2_id = response.json["message"]["id"]
-        self.username2 = response.json["message"]["username"]
+        self.user2_id = response.json["id"]
+        self.username2 = response.json["username"]
 
         response = self.client.post(
             "/login",
             json={
-                "username": "testuser2",
+                "username": self.username2,
                 "password": "Test@Abcd",
             },
             content_type="application/json",
@@ -101,7 +102,7 @@ class TestPosts(unittest.TestCase):
         response = self.client.post(
             "/posts", headers={"Authorization": "Token " + self.token1}, json=data
         )
-        self.post1_id = response.json["data"]["id"]
+        self.post1_id = response.json["id"]
 
     @classmethod
     def tearDownClass(self) -> None:
@@ -126,7 +127,7 @@ class TestPosts(unittest.TestCase):
         response = self.client.post(
             "/posts", headers={"Authorization": "Token " + self.token1}, json=data
         )
-        self.post1_id = response.json["data"]["id"]
+        self.post1_id = response.json["id"]
         # print(response.json)
         self.assertEqual(response.status_code, 201)
 
@@ -141,7 +142,7 @@ class TestPosts(unittest.TestCase):
         response = self.client.post(
             "/posts", headers={"Authorization": "Token " + self.token1}, json=data
         )
-        self.post2_id = response.json["data"]["id"]
+        self.post2_id = response.json["id"]
         # print(response.json)
         self.assertEqual(response.status_code, 201)
 
@@ -156,7 +157,7 @@ class TestPosts(unittest.TestCase):
         response = self.client.post(
             "/posts", headers={"Authorization": "Token " + self.token1}, json=data
         )
-        self.post3_id = response.json["data"]["id"]
+        self.post3_id = response.json["id"]
         # print(response.json)
         self.assertEqual(response.status_code, 201)
 

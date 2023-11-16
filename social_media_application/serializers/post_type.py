@@ -1,4 +1,4 @@
-from .. import ma
+from social_media_application import ma
 
 class PostTypeSchema(ma.Schema):
     class Meta:

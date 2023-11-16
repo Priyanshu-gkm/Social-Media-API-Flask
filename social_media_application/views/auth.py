@@ -1,13 +1,14 @@
 from flask import request, jsonify, make_response
 from flask import current_app as app
-from ..models import (
+
+from social_media_application.models import (
     db,
     User,
     Profile,
     BlacklistToken,
 )
-from ..serializers import user_schema
-from ..helpers.permissions import authenticate_user
+from social_media_application.serializers import user_schema
+from social_media_application.helpers.permissions import authenticate_user
 
 
 @app.route("/register", methods=["POST"])
@@ -29,7 +30,7 @@ def new_user():
         profile_pic = request.json["profile_pic"]
         if username and password:
             if User.query.filter_by(username=username).first():
-                response_object = {"status": "fail", "message": "User Already exists!"}
+                response_object = {"error": "User Already exists!"}
                 return make_response(jsonify(response_object)), 400
 
             user = User(username=username, email=email, password=password)
@@ -45,12 +46,12 @@ def new_user():
             db.session.add(profile)
             db.session.commit()
             data_dict = user_schema.dump(user)
-            response_object = {"status": "Success", "message": data_dict}
+            response_object = data_dict
             return make_response(jsonify(response_object)), 201
-        response_object = {"status": "Fail", "message": "Invalid credentials"}
+        response_object = {"error": "Invalid credentials"}
         return make_response(jsonify(response_object)), 400
     except Exception as e:
-        response_object = {"status": "fail", "message": str(e)}
+        response_object = {"error": str(e)}
         return make_response(jsonify(response_object)), 400
 
 
@@ -72,17 +73,15 @@ def login():
         ):
             auth_token = user.generate_auth_token()
         else:
-            response_object = {"status": "fail", "message": "incorrect credentials"}
+            response_object = {"error": "incorrect credentials"}
             return make_response(jsonify(response_object)), 400
         if auth_token:
             response_object = {
-                "status": "success",
-                "message": "Successfully logged in.",
                 "token": auth_token,
             }
             return make_response(jsonify(response_object)), 200
     except Exception as e:
-        response_object = {"status": "fail", "message": str(e)}
+        response_object = {"error": str(e)}
         return make_response(jsonify(response_object)), 400
 
 
@@ -105,17 +104,14 @@ def logout(**kwargs):
                 blacklist_token = BlacklistToken(token=auth_token)
                 db.session.add(blacklist_token)
                 db.session.commit()
-                response_object = {
-                    "status": "success",
-                    "message": "Successfully logged out.",
-                }
-                return make_response(jsonify(response_object)), 200
+                response_object = {}
+                return make_response(jsonify(response_object)), 205
             else:
-                response_object = {"status": "fail", "message": "invalid user"}
+                response_object = {"error": "user not found"}
                 return make_response(jsonify(response_object)), 400
         else:
-            response_object = {"status": "fail", "message": "Unauthenticated"}
+            response_object = {"error": "Unauthenticated"}
             return make_response(jsonify(response_object)), 401
     except Exception as e:
-        response_object = {"status": "fail", "message": str(e)}
+        response_object = {"error": str(e)}
         return make_response(jsonify(response_object)), 400

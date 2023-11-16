@@ -1,6 +1,7 @@
-from .. import db
-import uuid
 from sqlalchemy.dialects.postgresql import UUID
+import uuid
+
+from social_media_application import db
 
 class Connection(db.Model):
     __tablename__ = "connection"

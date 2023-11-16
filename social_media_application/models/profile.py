@@ -1,7 +1,7 @@
-from .. import db
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
 
+from social_media_application import db
 
 class Profile(db.Model):
     __tablename__ = "profile"

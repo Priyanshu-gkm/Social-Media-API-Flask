@@ -1,8 +1,8 @@
-from .. import db
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime as dt
 
+from social_media_application import db
 
 
 class Notification(db.Model):

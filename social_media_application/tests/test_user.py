@@ -1,16 +1,17 @@
 import unittest
 import os
-from social_media_application import create_app, db
 from sqlalchemy.sql import text
+
+from social_media_application import create_app, db
 
 
 def app():
     db_uri = f'postgresql://{os.environ.get("POSTGRES_USERNAME")}:{os.environ.get("PASSWORD")}@{os.environ.get("HOST")}/social_media_test'
     app = create_app(db_uri=db_uri)
     with app.app_context():
-        from .. import views
-        from .. import models
-        from .. import serializers
+        from social_media_application import views
+        from social_media_application import models
+        from social_media_application import serializers
         db.create_all()
     return app
 
@@ -38,7 +39,6 @@ class TestUserOps(unittest.TestCase):
                 db.session.commit()
 
     def test_userRegistration(self):
-        try:
             response = self.client.post(
                 "/register",
                 json={
@@ -54,11 +54,9 @@ class TestUserOps(unittest.TestCase):
             )
             # print(response.data)
             self.assertEqual(response.status_code, 201)
-        except Exception as e:
-            print("error=========", e)
+
 
     def test_user_login(self):
-        try:
             response = self.client.post(
                 "/login",
                 json={
@@ -71,11 +69,9 @@ class TestUserOps(unittest.TestCase):
             # print(token)
             self.assertEqual(response.status_code, 200)
             self.assertTrue("token" in response.json.keys())
-        except Exception as e:
-            print("error=========", e)
+
 
     def test_user_logout(self):
-        try:
             response = self.client.post(
                 "/login",
                 json={
@@ -89,9 +85,8 @@ class TestUserOps(unittest.TestCase):
             response = self.client.post(
                 "/logout", headers={"Authorization": "Token " + token}
             )
-            self.assertEqual(response.status_code, 200)
-        except Exception as e:
-            print("error=========", e)
+            self.assertEqual(response.status_code, 205)
+
 
 
 class Test_user_ops_post_login(unittest.TestCase):
@@ -112,8 +107,8 @@ class Test_user_ops_post_login(unittest.TestCase):
             },
             content_type="application/json",
         )
-        self.user_id = response.json["message"]["id"]
-        self.username = response.json["message"]["username"]
+        self.user_id = response.json["id"]
+        self.username = response.json["username"]
 
         response = self.client.post(
             "/login",
@@ -138,16 +133,13 @@ class Test_user_ops_post_login(unittest.TestCase):
                 db.session.commit()
 
     def test_get_all_users(self):
-        try:
             response = self.client.get(
                 "/users", headers={"Authorization": "Token " + self.token}
             )
             self.assertEqual(response.status_code, 200)
-        except Exception as e:
-            print("error=========", e)
+
 
     def test_update_user(self):
-        try:
             update_info = {"first_name": "updated_first_name"}
             response = self.client.patch(
                 f"/users/{self.user_id}",
@@ -155,17 +147,12 @@ class Test_user_ops_post_login(unittest.TestCase):
                 json=update_info,
             )
             self.assertEqual(response.status_code, 200)
-        except Exception as e:
-            print("error=========", e)
+
 
     def test_update_user_delete(self):
-        # try:
-        # print(self.user_id)
         response = self.client.delete(
             f"/users/{self.user_id}", headers={"Authorization": "Token " + self.token}
         )
         # print(response.__dict__)
         self.assertEqual(response.status_code, 204)
 
-    # except Exception as e:
-    # print("error=========",str(e))

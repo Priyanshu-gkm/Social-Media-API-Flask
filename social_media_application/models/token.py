@@ -1,8 +1,8 @@
-from .. import db
 from datetime import datetime
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
 
+from social_media_application import db
 
 class BlacklistToken(db.Model):
     """
