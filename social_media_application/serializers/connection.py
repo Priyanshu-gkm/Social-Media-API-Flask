@@ -1,4 +1,4 @@
-from SocialMediaApplication.models import User
+from social_media_application.models import User
 from marshmallow import fields
 from .. import  ma
 

@@ -1,5 +1,5 @@
 from flask import current_app as app
-from SocialMediaApplication.models.token import BlacklistToken
+from social_media_application.models.token import BlacklistToken
 from .. import db
 import uuid
 from sqlalchemy.dialects.postgresql import UUID

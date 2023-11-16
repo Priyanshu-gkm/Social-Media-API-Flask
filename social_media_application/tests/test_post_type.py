@@ -1,6 +1,6 @@
 import unittest
 import os
-from SocialMediaApplication import create_app, db
+from social_media_application import create_app, db
 from sqlalchemy.sql import text
 
 

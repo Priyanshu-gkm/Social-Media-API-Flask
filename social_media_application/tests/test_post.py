@@ -1,6 +1,6 @@
 import unittest
 import os
-from SocialMediaApplication import create_app, db
+from social_media_application import create_app, db
 from sqlalchemy.sql import text
 
 
@@ -18,8 +18,7 @@ def app():
 app_test = app()
 client = app_test.test_client()
 
-
-class TestFollow(unittest.TestCase):
+class TestPosts(unittest.TestCase):
     @classmethod
     def setUpClass(self) -> None:
         self.app_test = app_test
@@ -116,109 +115,76 @@ class TestFollow(unittest.TestCase):
                 )
                 db.session.commit()
 
-    def test_follow_request_send_1_2_and_notifications(self):
-        data = {"user": "testuser2"}
+    def test_create_post_text(self):
+        data = {
+            "title": "Test Post 1 by user1",
+            "url": "can be blank or anything, final result will be none only",
+            "content": "lorem ipsum dolor test content",
+            "post_type": "text",
+            "tags": "text,hastag,testingtag,user1",
+        }
         response = self.client.post(
-            "/follow-requests", headers={"Authorization": "Token " + self.token1}, json=data
+            "/posts", headers={"Authorization": "Token " + self.token1}, json=data
         )
-        # print(response.__dict__)
+        self.post1_id = response.json["data"]["id"]
+        # print(response.json)
         self.assertEqual(response.status_code, 201)
 
+    def test_create_post_image(self):
+        data = {
+            "title": "Test Post 2 by user1",
+            "url": "https://unsplash.com/photos/a-bunch-of-pink-donuts-are-stacked-on-top-of-each-other-obyYZVKwCNI",
+            "content": "lorem ipsum dolor test content",
+            "post_type": "image",
+            "tags": "image,hastag,testingtag,user1",
+        }
+        response = self.client.post(
+            "/posts", headers={"Authorization": "Token " + self.token1}, json=data
+        )
+        self.post2_id = response.json["data"]["id"]
+        # print(response.json)
+        self.assertEqual(response.status_code, 201)
+
+    def test_create_post_video(self):
+        data = {
+            "title": "Test Post 3 by user1",
+            "url": "https://www.youtube.com/watch?v=CvQ7e6yUtnw&ab_channel=ArjanCodes",
+            "content": "lorem ipsum dolor test content",
+            "post_type": "video",
+            "tags": "video,hastag,testingtag,user1",
+        }
+        response = self.client.post(
+            "/posts", headers={"Authorization": "Token " + self.token1}, json=data
+        )
+        self.post3_id = response.json["data"]["id"]
+        # print(response.json)
+        self.assertEqual(response.status_code, 201)
+
+    def test_get_all_posts(self):
         response = self.client.get(
-            "/notifications", headers={"Authorization": "Token " + self.token2}
+            "/posts", headers={"Authorization": "Token " + self.token1}
         )
         # print(response.json)
         self.assertEqual(response.status_code, 200)
 
-    def test_get_follow_requests_accept(self):
+    def test_get_post_by_id(self):
         response = self.client.get(
-            "/follow-requests", headers={"Authorization": "Token " + self.token2}
+            f"/posts/{self.post1_id}", headers={"Authorization": "Token " + self.token1}
         )
-        # print(response.json)
         self.assertEqual(response.status_code, 200)
 
-        follow_request_id = response.json["message"][0]["id"]
-        data = {"response": "accept"}
+    def test_update_post_by_id(self):
+        data = {"content": "updated content"}
         response = self.client.patch(
-            f"/follow-requests/{follow_request_id}",
-            headers={"Authorization": "Token " + self.token2},
+            f"/posts/{self.post1_id}",
+            headers={"Authorization": "Token " + self.token1},
             json=data,
         )
         # print(response.json)
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get(
-            "/notifications", headers={"Authorization": "Token " + self.token1}
-        )
-        # print(response.json)
-        self.assertEqual(response.status_code, 200)
-
-    def test_get_follow_requests_accept_feed(self):
-        response = self.client.post(
-            "/register",
-            json={
-                "username": "testuser3",
-                "password": "Test@Abcd",
-                "email": "test3@gmail.com",
-                "first_name": "test3",
-                "last_name": "test3",
-                "bio": "test bio 3",
-                "profile_pic": "https://unsplash.com/photos/man-wearing-green-polo-shirt-6anudmpILw4",
-            },
-            content_type="application/json",
-        )
-        username3 = response.json["message"]["username"]
-
-        response = self.client.post(
-            "/login",
-            json={
-                "username": username3,
-                "password": "Test@Abcd",
-            },
-            content_type="application/json",
-        )
-        token3 = response.json["token"]
-        data = {
-            "title": "Test Post 1 by user3",
-            "url": "https://unsplash.com/photos/a-bunch-of-pink-donuts-are-stacked-on-top-of-each-other-obyYZVKwCNI",
-            "content": "lorem ipsum dolor test content",
-            "post_type": "image",
-            "tags": "image,hastag,testingtag,user3",
-        }
-        response = self.client.post(
-            "/posts", headers={"Authorization": "Token " + token3}, json=data
-        )
-        self.post1_id = response.json["data"]["id"]
-
-        response = self.client.get(
-            "/posts", headers={"Authorization": "Token " + self.token2}
-        )
-        # print("all the posts")
-        # print(response.json)
-        self.assertEqual(response.status_code, 200)
-
-        response = self.client.get(
-            "/connections", headers={"Authorization": "Token " + self.token2}
-        )
-        # print("connections")
-        # print(response.json)
-        self.assertEqual(response.status_code, 200)
-
-        response = self.client.get(
-            "/feed", headers={"Authorization": "Token " + self.token2}
-        )
-        # print("user feed")
-        # print(response.json)
-        self.assertEqual(response.status_code, 200)
-
-        response = self.client.get(
-            "/connections", headers={"Authorization": "Token " + self.token2}
-        )
-        self.assertEqual(response.status_code, 200)
-        follow_request_id = response.json["message"][0]["id"]
+    def test_update_post_delete(self):
         response = self.client.delete(
-            f"/follow-requests/{follow_request_id}",
-            headers={"Authorization": "Token " + self.token1},
+            f"/posts/{self.post1_id}", headers={"Authorization": "Token " + self.token1}
         )
-        # print(response.__dict__)
         self.assertEqual(response.status_code, 204)

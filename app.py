@@ -1,4 +1,4 @@
-from SocialMediaApplication import create_app
+from social_media_application import create_app
 app = create_app()
 
 if __name__ == "__main__":
