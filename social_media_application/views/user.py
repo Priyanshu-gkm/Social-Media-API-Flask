@@ -22,10 +22,7 @@ def get_all_users(**kwargs):
     Returns json where noticed details about all users (users_schema)
     :return: json
     """
-    response_object = {
-        "status": "Success",
-        "message": users_schema.dump(User.query.filter_by(archive=False)),
-    }
+    response_object = users_schema.dump(User.query.filter_by(archive=False))
     return make_response(jsonify(response_object)), 200
 
 
@@ -40,18 +37,16 @@ def get_user(id, **kwargs):
     try:
         user = User.query.filter_by(id=id).first()
         if user:
-            response_object = {"status": "Success", "message": user_schema.dump(user)}
+            response_object =  user_schema.dump(user)
             return make_response(jsonify(response_object)), 200
         else:
             response_object = {
-                "status": "fail",
-                "message": "user not found",
+                "error": "user not found"
             }
         return make_response(jsonify(response_object)), 400
     except Exception as e:
         response_object = {
-            "status": "fail",
-            "message": str(e),
+            "error": str(e)
         }
         return make_response(jsonify(response_object)), 400
 
@@ -71,15 +66,11 @@ def update_user(id):
                 setattr(profile, k, v)
         db.session.commit()
         data_dict = user_schema.dump(user)
-        response_object = {
-            "status": "successf",
-            "message": "successfully updated details",
-            "data": data_dict,
-        }
+        response_object =  data_dict
         return make_response(jsonify(response_object)), 200
 
     except Exception as e:
-        response_object = {"status": "fail", "message": str(e)}
+        response_object = { "error": str(e)}
         return make_response(jsonify(response_object)), 400
 
 
@@ -118,11 +109,8 @@ def delete_user(id, **kwargs):
         db.session.add(blacklist_token)
         db.session.commit()
 
-        response_object = {
-            "status": "Success",
-            "message": f"User {user.username} deleted successfully!!",
-        }
+        response_object = {}
         return make_response(jsonify(response_object)), 204
     except Exception as e:
-        response_object = {"status": "fail", "message": str(e)}
+        response_object = {"error": str(e)}
         return make_response(jsonify(response_object)), 400

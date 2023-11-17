@@ -71,5 +71,5 @@ def mark_all_notifications_as_read(**kwargs):
             response_object = {"error": "user not found"}
             return make_response(jsonify(response_object)), 400
     except Exception as e:
-        response_object = {"message": str(e)}
+        response_object = {"error": str(e)}
         return make_response(jsonify(response_object)), 400
