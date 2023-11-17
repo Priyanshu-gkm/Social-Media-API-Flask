@@ -21,7 +21,7 @@ app_test = app()
 client = app_test.test_client()
 
 
-class TestConnection(unittest.TestCase):
+class TestFeed(unittest.TestCase):
     @classmethod
     def setUpClass(self) -> None:
         self.app_test = app_test
