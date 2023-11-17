@@ -12,6 +12,7 @@ def app():
         from social_media_application import views
         from social_media_application import models
         from social_media_application import serializers
+
         db.create_all()
     return app
 
@@ -45,7 +46,7 @@ class TestPostType(unittest.TestCase):
         response = self.client.post(
             "/login",
             json={
-                "username": "testuser1",
+                "username": self.username,
                 "password": "Test@Abcd",
             },
             content_type="application/json",
@@ -71,16 +72,29 @@ class TestPostType(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 201)
 
-    def test_create_post_type_1(self):
-        data = {"name": "image"}
+    def test_create_post_type_fail_no_name(self):
+        data = {"name": ""}
         response = self.client.post(
             "/post-types", headers={"Authorization": "Token " + self.token}, json=data
         )
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 400)
+        self.assertTrue("error" in response.json.keys())
+
+    def test_create_post_type_fail_already_exists(self):
+        data = {"name": "text"}
+        response = self.client.post(
+            "/post-types", headers={"Authorization": "Token " + self.token}, json=data
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertTrue("error" in response.json.keys())
+
+    def test_create_post_type_fail_unauthenticated(self):
+        data = {"name": "text"}
+        response = self.client.post("/post-types")
+        self.assertEqual(response.status_code, 401)
+        self.assertTrue("error" in response.json.keys())
 
     def test_get_post_type(self):
-        response = self.client.get(
-            "/post-types", headers={"Authorization": "Token " + self.token}
-        )
-        # print(response.json)
+        response = self.client.get("/post-types")
         self.assertEqual(response.status_code, 200)
+        self.assertTrue(type(response.json)==list)
