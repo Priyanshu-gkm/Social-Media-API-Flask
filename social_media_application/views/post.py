@@ -16,7 +16,8 @@ from social_media_application.helpers.permissions import (
 
 
 @app.route("/posts", methods=["GET"])
-def get_all_posts():
+@authenticate_user
+def get_all_posts(**kwargs):
     """
     Returns json where noticed details about all posts (posts_schema)
     :return: json
@@ -62,7 +63,7 @@ def new_post(**kwargs):
         return make_response(jsonify(response_object)), 400
 
     except Exception as e:
-        response_object = {"errror": str(e)}
+        response_object = {"error": str(e)}
         return make_response(jsonify(response_object)), 400
 
 
