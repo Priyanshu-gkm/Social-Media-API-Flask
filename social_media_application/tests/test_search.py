@@ -12,6 +12,7 @@ def app():
         from social_media_application import views
         from social_media_application import models
         from social_media_application import serializers
+
         db.create_all()
     return app
 
@@ -120,50 +121,36 @@ class TestSearch(unittest.TestCase):
 
     def test_search_user(self):
         url = f"/search?username={self.username1}"
-        response = self.client.get(
-            url, headers={"Authorization": "Token " + self.token2}
-        )
-        # print(response.json)
+        response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-
-    def test_search_post(self):
-        url = f"/search?post={self.post1_title}"
-        # print(url)
-        response = self.client.get(
-            url, headers={"Authorization": "Token " + self.token2}
-        )
-        # print(response.json)
-        self.assertEqual(response.status_code, 200)
-
-    def test_search_tag(self):
-        url = f"/search?tag={self.post1_tags}"
-        response = self.client.get(
-            url, headers={"Authorization": "Token " + self.token2}
-        )
-        # print(response.json)
-        self.assertEqual(response.status_code, 200)
+        self.assertTrue("id" in response.json.keys())
 
     def test_search_user_fail(self):
         url = f"/search?username=absgvd"
-        response = self.client.get(
-            url, headers={"Authorization": "Token " + self.token2}
-        )
-        # print(response.json)
+        response = self.client.get(url)
         self.assertEqual(response.status_code, 400)
+        self.assertTrue("error" in response.json.keys())
+
+    def test_search_post(self):
+        url = f"/search?post={self.post1_title}"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(type(response.json)==list)
 
     def test_search_post_fail(self):
         url = f"/search?post=jvbifh db vhjib bivb"
-        # print(url)
-        response = self.client.get(
-            url, headers={"Authorization": "Token " + self.token2}
-        )
-        # print(response.json)
+        response = self.client.get(url)
         self.assertEqual(response.status_code, 400)
+        self.assertTrue("error" in response.json.keys())
+
+    def test_search_tag(self):
+        url = f"/search?tag={self.post1_tags}"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(type(response.json)==list)
 
     def test_search_tag_fail(self):
         url = f"/search?tag=unknowntag"
-        response = self.client.get(
-            url, headers={"Authorization": "Token " + self.token2}
-        )
-        # print(response.json)
+        response = self.client.get(url)
         self.assertEqual(response.status_code, 400)
+        self.assertTrue("error" in response.json.keys())
