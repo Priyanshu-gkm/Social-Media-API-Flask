@@ -93,25 +93,12 @@ def logout(**kwargs):
     :return: response
     """
     try:
-        auth_header = request.headers.get("Authorization")
-        if auth_header:
-            auth_token = auth_header.split(" ")[1]
-        else:
-            auth_token = None
-        if auth_token:
-            resp = User.verify_auth_token(auth_token)
-            if User.query.filter_by(username=resp).first():
-                blacklist_token = BlacklistToken(token=auth_token)
-                db.session.add(blacklist_token)
-                db.session.commit()
-                response_object = {}
-                return make_response(jsonify(response_object)), 205
-            else:
-                response_object = {"error": "user not found"}
-                return make_response(jsonify(response_object)), 400
-        else:
-            response_object = {"error": "Unauthenticated"}
-            return make_response(jsonify(response_object)), 401
+        token = request.headers.get("Authorization").split(" ")[1]
+        blacklist_token = BlacklistToken(token=token)
+        db.session.add(blacklist_token)
+        db.session.commit()
+        response_object = {}
+        return make_response(jsonify(response_object)), 205
     except Exception as e:
         response_object = {"error": str(e)}
         return make_response(jsonify(response_object)), 400
