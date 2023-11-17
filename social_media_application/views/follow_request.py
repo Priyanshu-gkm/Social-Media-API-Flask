@@ -2,7 +2,7 @@ from flask import request, jsonify, make_response
 from flask import current_app as app
 
 from social_media_application.models import db, User, Connection, Notification
-from social_media_application.serializers import  connections_schema
+from social_media_application.serializers import connections_schema , connection_schema
 from social_media_application.helpers.permissions import authenticate_user
 
 
@@ -67,9 +67,7 @@ def follow(**kwargs):
             )
             db.session.add(notification_object)
             db.session.commit()
-            response_object = {
-                "message": "Follow request sent to {}".format(receiver.username),
-            }
+            response_object = connection_schema.dump(follow_request)
             return make_response(jsonify(response_object)), 200
         else:
             response_object = {"error": "unknown username {}".format(user)}
@@ -101,7 +99,7 @@ def respond_to_follow_request(id, **kwargs):
                     )
                     db.session.add(notification_object)
                     db.session.commit()
-                    response_object = {"message": "request accepted successfully"}
+                    response_object = connection_schema.dump(follow_request)
                     return make_response(jsonify(response_object)), 200
                 elif request.get_json()["response"] == "reject":
                     notification_object = Notification(
@@ -112,7 +110,7 @@ def respond_to_follow_request(id, **kwargs):
                     db.session.commit()
                     Connection.query.filter_by(id=id).delete()
                     db.session.commit()
-                    response_object = {"message": "request deleted successfully"}
+                    response_object = {}
                     return make_response(jsonify(response_object)), 200
         else:
             response_object = {

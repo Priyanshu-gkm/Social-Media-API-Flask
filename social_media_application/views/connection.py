@@ -13,42 +13,37 @@ from social_media_application.helpers.permissions import authenticate_user
 def get_connections(**kwargs):
     try:
         user = kwargs.get("current_user")
-        if user:
-            connections = (
-                db.session.execute(
-                    db.select(Connection)
-                    .where(Connection.accepted == True)
-                    .where(
-                        or_(
-                            Connection.sender == user.id, Connection.receiver == user.id
-                        )
+        connections = (
+            db.session.execute(
+                db.select(Connection)
+                .where(Connection.accepted == True)
+                .where(
+                    or_(
+                        Connection.sender == user.id, Connection.receiver == user.id
                     )
-                    .where(Connection.archive == False)
                 )
-                .scalars()
-                .all()
+                .where(Connection.archive == False)
             )
-            connections = connections_schema.dump(connections)
-            for connection in connections:
-                delete_key = ""
-                rename_key = ""
-                for k, v in connection.items():
-                    if v == user.username:
-                        delete_key = k
-                    elif (
-                        k.startswith("sender")
-                        or k.startswith("receiver")
-                        and v != user.username
-                    ):
-                        rename_key = k
-                del connection[delete_key]
-                connection["user"] = connection.pop(rename_key)
-            response_object = connections
-            return make_response(jsonify(response_object)), 200
-
-        else:
-            response_object = {"error": "user not found"}
-            return make_response(jsonify(response_object)), 400
+            .scalars()
+            .all()
+        )
+        connections = connections_schema.dump(connections)
+        for connection in connections:
+            delete_key = ""
+            rename_key = ""
+            for k, v in connection.items():
+                if v == user.username:
+                    delete_key = k
+                elif (
+                    k.startswith("sender")
+                    or k.startswith("receiver")
+                    and v != user.username
+                ):
+                    rename_key = k
+            del connection[delete_key]
+            connection["user"] = connection.pop(rename_key)
+        response_object = connections
+        return make_response(jsonify(response_object)), 200
     except Exception as e:
         response_object = {"error": str(e)}
         return make_response(jsonify(response_object)), 400
