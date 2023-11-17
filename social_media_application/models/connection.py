@@ -17,8 +17,8 @@ class Connection(db.Model):
     accepted = db.Column(db.Boolean, default=False, nullable=False)
     archive = archive = db.Column(db.Boolean, default=False)
 
-    def __init__(self, sender, receiver):
+    def __init__(self, sender, receiver,accepted=False):
         self.sender = sender
         self.receiver = receiver
-        self.accepted = False
+        self.accepted = accepted
         self.archive = False

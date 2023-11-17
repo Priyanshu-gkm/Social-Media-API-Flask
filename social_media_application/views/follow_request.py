@@ -11,25 +11,20 @@ from social_media_application.helpers.permissions import authenticate_user
 def get_my_follow_requests(**kwargs):
     try:
         user = kwargs.get("current_user")
-        if user:
-            follow_requests = Connection.query.filter_by(
-                receiver=user.id, accepted=False
-            ).all()
+        follow_requests = Connection.query.filter_by(
+            receiver=user.id, accepted=False
+        ).all()
 
-            if len(follow_requests) == 0:
-                response_object = {}
-                return make_response(jsonify(response_object)), 200
-
-            follow_requests = connections_schema.dump(follow_requests)
-            for follow_request in follow_requests:
-                follow_request.pop("receiver")
-                follow_request["user"] = follow_request.pop("sender")
-            response_object = follow_requests
+        if len(follow_requests) == 0:
+            response_object = []
             return make_response(jsonify(response_object)), 200
 
-        else:
-            response_object = {"error": "user not found"}
-            return make_response(jsonify(response_object)), 400
+        follow_requests = connections_schema.dump(follow_requests)
+        for follow_request in follow_requests:
+            follow_request.pop("receiver")
+            follow_request["user"] = follow_request.pop("sender")
+        response_object = follow_requests
+        return make_response(jsonify(response_object)), 200
     except Exception as e:
         response_object = {"error": str(e)}
         return make_response(jsonify(response_object)), 400
