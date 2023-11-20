@@ -78,6 +78,11 @@ def respond_to_follow_request(id, **kwargs):
     try:
         user = kwargs.get("current_user")
         follow_request = Connection.query.filter_by(id=id).first()
+        if follow_request==None:
+            response_object = {
+                    "error": "invalid",
+                }
+            return make_response(jsonify(response_object)), 400
         if follow_request.receiver == user.id:
             if follow_request.accepted == True:
                 response_object = {
