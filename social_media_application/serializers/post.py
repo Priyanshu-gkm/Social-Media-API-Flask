@@ -11,6 +11,7 @@ class PostSchema(ma.Schema):
             "creator",
             "post_type",
             "archive",
+            "tags"
         )
 
 
