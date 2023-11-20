@@ -19,7 +19,7 @@ class User(db.Model):
         unique=True,
         nullable=False,
     )  
-    username = db.Column(db.String(32), index=True, nullable=False)
+    username = db.Column(db.String(32), index=True, nullable=False,unique=True)
     password_hash = db.Column(
         db.String(64), nullable=False
     )  # Hashed password for better security
