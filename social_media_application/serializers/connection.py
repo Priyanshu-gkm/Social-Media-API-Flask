@@ -3,6 +3,7 @@ from marshmallow import fields
 from social_media_application import ma
 from social_media_application.models import User
 
+
 class ConnectionSchema(ma.Schema):
     sender = fields.Method("get_sender")
     receiver = fields.Method("get_receiver")

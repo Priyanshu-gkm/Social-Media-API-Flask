@@ -4,6 +4,7 @@ from social_media_application import ma
 from social_media_application.models import Profile
 from social_media_application.serializers import profile_schema
 
+
 class UserSchema(ma.Schema):
     profile = fields.Method("get_profile")
 

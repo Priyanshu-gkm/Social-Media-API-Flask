@@ -135,7 +135,7 @@ class TestSearch(unittest.TestCase):
         url = f"/search?post={self.post1_title}"
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(type(response.json)==list)
+        self.assertTrue(type(response.json) == list)
 
     def test_search_post_fail(self):
         url = f"/search?post=jvbifh db vhjib bivb"
@@ -147,7 +147,7 @@ class TestSearch(unittest.TestCase):
         url = f"/search?tag={self.post1_tags}"
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(type(response.json)==list)
+        self.assertTrue(type(response.json) == list)
 
     def test_search_tag_fail(self):
         url = f"/search?tag=unknowntag"

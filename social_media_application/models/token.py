@@ -4,6 +4,7 @@ from sqlalchemy.dialects.postgresql import UUID
 
 from social_media_application import db
 
+
 class BlacklistToken(db.Model):
     """
     Token Model for storing JWT tokens

@@ -18,9 +18,7 @@ def get_connections(**kwargs):
                 db.select(Connection)
                 .where(Connection.accepted == True)
                 .where(
-                    or_(
-                        Connection.sender == user.id, Connection.receiver == user.id
-                    )
+                    or_(Connection.sender == user.id, Connection.receiver == user.id)
                 )
                 .where(Connection.archive == False)
             )
@@ -29,19 +27,13 @@ def get_connections(**kwargs):
         )
         connections = connections_schema.dump(connections)
         for connection in connections:
-            delete_key = ""
-            rename_key = ""
-            for k, v in connection.items():
-                if v == user.username:
-                    delete_key = k
-                elif (
-                    k.startswith("sender")
-                    or k.startswith("receiver")
-                    and v != user.username
-                ):
-                    rename_key = k
-            del connection[delete_key]
-            connection["user"] = connection.pop(rename_key)
+            if connection["sender"] == user.username:
+                connection["user"] = connection.pop("receiver")
+                del_key = "sender"
+            elif connection["receiver"] == user.username:
+                connection["user"] = connection.pop("sender")
+                del_key = "receiver"
+            del connection[del_key]
         response_object = connections
         return make_response(jsonify(response_object)), 200
     except Exception as e:

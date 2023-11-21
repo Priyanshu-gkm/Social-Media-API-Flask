@@ -37,17 +37,13 @@ def get_user(id, **kwargs):
     try:
         user = User.query.filter_by(id=id).first()
         if user:
-            response_object =  user_schema.dump(user)
+            response_object = user_schema.dump(user)
             return make_response(jsonify(response_object)), 200
         else:
-            response_object = {
-                "error": "user not found"
-            }
+            response_object = {"error": "user not found"}
         return make_response(jsonify(response_object)), 400
     except Exception as e:
-        response_object = {
-            "error": str(e)
-        }
+        response_object = {"error": str(e)}
         return make_response(jsonify(response_object)), 400
 
 
@@ -66,11 +62,11 @@ def update_user(id):
                 setattr(profile, k, v)
         db.session.commit()
         data_dict = user_schema.dump(user)
-        response_object =  data_dict
+        response_object = data_dict
         return make_response(jsonify(response_object)), 200
 
     except Exception as e:
-        response_object = { "error": str(e)}
+        response_object = {"error": str(e)}
         return make_response(jsonify(response_object)), 400
 
 
@@ -96,7 +92,9 @@ def delete_user(id, **kwargs):
             db.session.execute(
                 db.select(Connection)
                 .where(Connection.accepted == True)
-                .where(or_(Connection.sender == user.id, Connection.receiver == user.id))
+                .where(
+                    or_(Connection.sender == user.id, Connection.receiver == user.id)
+                )
                 .where(Connection.archive == False)
             )
             .scalars()

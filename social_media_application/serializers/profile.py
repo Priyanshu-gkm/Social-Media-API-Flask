@@ -1,5 +1,6 @@
 from social_media_application import ma
 
+
 class ProfileSchema(ma.Schema):
     class Meta:
         fields = ("first_name", "last_name", "bio", "profile_pic")

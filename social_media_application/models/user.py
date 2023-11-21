@@ -1,14 +1,15 @@
 from flask import current_app as app
 
-import jwt 
+import jwt
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
 from passlib.hash import bcrypt
-from datetime import timedelta as td  
+from datetime import timedelta as td
 from datetime import datetime as dt
 
 from social_media_application import db
 from social_media_application.models.token import BlacklistToken
+
 
 class User(db.Model):
     __tablename__ = "user"
@@ -18,13 +19,16 @@ class User(db.Model):
         default=uuid.uuid4,
         unique=True,
         nullable=False,
-    )  
-    username = db.Column(db.String(32), index=True, nullable=False,unique=True)
+    )
+    username = db.Column(db.String(32), index=True, nullable=False, unique=True)
     password_hash = db.Column(
         db.String(64), nullable=False
     )  # Hashed password for better security
     email = db.Column(db.String(50), unique=True, nullable=False)
     archive = db.Column(db.Boolean, default=False, nullable=False)
+    forget_password_token = db.Column(
+        UUID(as_uuid=True), default=None, unique=True, nullable=True
+    )
 
     def __init__(self, email, password, username):
         self.username = username

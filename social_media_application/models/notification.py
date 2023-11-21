@@ -13,7 +13,7 @@ class Notification(db.Model):
         default=uuid.uuid4,
         unique=True,
         nullable=False,
-    ) 
+    )
     user = db.Column(UUID(as_uuid=True), db.ForeignKey("user.id"))
     msg = db.Column(db.String(500))
     read = db.Column(db.Boolean, default=False, nullable=False)
@@ -24,6 +24,3 @@ class Notification(db.Model):
         self.msg = msg
         self.read = False
         self.published_at = dt.now()
-
-
-

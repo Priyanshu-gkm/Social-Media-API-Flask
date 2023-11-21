@@ -3,7 +3,7 @@ import os
 from sqlalchemy.sql import text
 
 from social_media_application import create_app, db
-from social_media_application.models import Notification , Connection
+from social_media_application.models import Notification, Connection
 
 
 def app():
@@ -13,6 +13,7 @@ def app():
         from social_media_application import views
         from social_media_application import models
         from social_media_application import serializers
+
         db.create_all()
     return app
 
@@ -26,8 +27,8 @@ class TestFollowRequest(unittest.TestCase):
     def setUpClass(self) -> None:
         self.app_test = app_test
         self.client = app_test.test_client()
-        
-        #create user 1
+
+        # create user 1
         response = self.client.post(
             "/register",
             json={
@@ -55,7 +56,7 @@ class TestFollowRequest(unittest.TestCase):
         )
         self.token1 = response.json["token"]
 
-        #create user 2
+        # create user 2
         response = self.client.post(
             "/register",
             json={
@@ -81,8 +82,8 @@ class TestFollowRequest(unittest.TestCase):
             content_type="application/json",
         )
         self.token2 = response.json["token"]
-        
-        #create user 3
+
+        # create user 3
         response = self.client.post(
             "/register",
             json={
@@ -108,14 +109,14 @@ class TestFollowRequest(unittest.TestCase):
             content_type="application/json",
         )
         self.token3 = response.json["token"]
-        
-        #create connection user 1 and user 3
+
+        # create connection user 1 and user 3
         with self.app_test.app_context():
-            connection = Connection(sender=self.user1_id,receiver=self.user3_id,accepted=True)
+            connection = Connection(
+                sender=self.user1_id, receiver=self.user3_id, accepted=True
+            )
             db.session.add(connection)
             db.session.commit()
-
-       
 
     @classmethod
     def tearDownClass(self) -> None:
@@ -129,64 +130,76 @@ class TestFollowRequest(unittest.TestCase):
                 )
                 db.session.commit()
 
-
     def test_follow_request_send_fail_unauthenticated(self):
         data = {"user": "testuser2"}
-        response = self.client.post(
-            "/follow-requests", json=data
-        )
+        response = self.client.post("/follow-requests", json=data)
         self.assertEqual(response.status_code, 401)
         self.assertTrue("error" in response.json.keys())
         self.assertTrue("Unauthenticated" in response.json.values())
-        
+
     def test_follow_request_send_fail_invalid_username(self):
         data = {"user": "some-random-user-name"}
         response = self.client.post(
-            "/follow-requests", json=data, headers={"Authorization": "Token " + self.token1}
+            "/follow-requests",
+            json=data,
+            headers={"Authorization": "Token " + self.token1},
         )
         self.assertEqual(response.status_code, 400)
         self.assertTrue("error" in response.json.keys())
-        self.assertTrue("unknown username "+data['user'] in response.json.values())
-        
+        self.assertTrue("unknown username " + data["user"] in response.json.values())
+
     def test_follow_request_send_fail_self(self):
         data = {"user": self.username1}
         response = self.client.post(
-            "/follow-requests", json=data , headers={"Authorization": "Token " + self.token1}
+            "/follow-requests",
+            json=data,
+            headers={"Authorization": "Token " + self.token1},
         )
         self.assertEqual(response.status_code, 400)
         self.assertTrue("error" in response.json.keys())
-        self.assertTrue("You can't send follow request to yourself" in response.json.values())
-        
+        self.assertTrue(
+            "You can't send follow request to yourself" in response.json.values()
+        )
+
     def test_follow_request_send_1_2_and_notifications(self):
         data = {"user": self.username2}
         response = self.client.post(
-            "/follow-requests", headers={"Authorization": "Token " + self.token1}, json=data
+            "/follow-requests",
+            headers={"Authorization": "Token " + self.token1},
+            json=data,
         )
         self.assertEqual(response.status_code, 200)
         self.assertTrue("id" in response.json.keys())
-        
+
         with self.app_test.app_context():
-            connection = Connection.query.filter_by(sender=self.user1_id,receiver=self.user2_id).first() # request sent
-            notification = Notification.query.filter_by(user=self.user2_id).first() # notification made
+            connection = Connection.query.filter_by(
+                sender=self.user1_id, receiver=self.user2_id
+            ).first()  # request sent
+            notification = Notification.query.filter_by(
+                user=self.user2_id
+            ).first()  # notification made
 
             self.assertTrue(connection.id)
             self.assertTrue(notification.id)
-            
+
     def test_follow_request_send_1_3_existing_connection(self):
         data = {"user": self.username3}
         response = self.client.post(
-            "/follow-requests", headers={"Authorization": "Token " + self.token1}, json=data
+            "/follow-requests",
+            headers={"Authorization": "Token " + self.token1},
+            json=data,
         )
         self.assertEqual(response.status_code, 400)
         self.assertTrue("error" in response.json.keys())
-        
+
+
 class TestFollowRequestResponse(unittest.TestCase):
     @classmethod
     def setUpClass(self) -> None:
         self.app_test = app_test
         self.client = app_test.test_client()
-        
-        #create user 1
+
+        # create user 1
         response = self.client.post(
             "/register",
             json={
@@ -214,7 +227,7 @@ class TestFollowRequestResponse(unittest.TestCase):
         )
         self.token1 = response.json["token"]
 
-        #create user 2
+        # create user 2
         response = self.client.post(
             "/register",
             json={
@@ -240,8 +253,8 @@ class TestFollowRequestResponse(unittest.TestCase):
             content_type="application/json",
         )
         self.token2 = response.json["token"]
-        
-        #create user 3
+
+        # create user 3
         response = self.client.post(
             "/register",
             json={
@@ -267,12 +280,14 @@ class TestFollowRequestResponse(unittest.TestCase):
             content_type="application/json",
         )
         self.token3 = response.json["token"]
-        
-        #create connections
+
+        # create connections
         with self.app_test.app_context():
-            connection1 = Connection(sender=self.user1_id,receiver=self.user3_id)
-            connection2 = Connection(sender=self.user1_id,receiver=self.user2_id)
-            connection3 = Connection(sender=self.user2_id,receiver=self.user3_id,accepted=True)
+            connection1 = Connection(sender=self.user1_id, receiver=self.user3_id)
+            connection2 = Connection(sender=self.user1_id, receiver=self.user2_id)
+            connection3 = Connection(
+                sender=self.user2_id, receiver=self.user3_id, accepted=True
+            )
             db.session.add(connection1)
             db.session.add(connection2)
             db.session.add(connection3)
@@ -281,8 +296,6 @@ class TestFollowRequestResponse(unittest.TestCase):
             self.connection2_id = connection2.id
             self.connection3_id = connection3.id
 
-       
-
     @classmethod
     def tearDownClass(self) -> None:
         with self.app_test.app_context():
@@ -295,33 +308,32 @@ class TestFollowRequestResponse(unittest.TestCase):
                 )
                 db.session.commit()
 
-
     def test_follow_request_update_fail_unauthenticated(self):
-        data = {'response':"accept"}
+        data = {"response": "accept"}
         response = self.client.patch(
-            f"/follow-requests/{self.connection1_id}" , json=data
+            f"/follow-requests/{self.connection1_id}", json=data
         )
         self.assertEqual(response.status_code, 401)
         self.assertTrue("error" in response.json.keys())
         self.assertTrue("Unauthenticated" in response.json.values())
-        
 
     def test_follow_request_update_fail_unauthorized(self):
-        data = {'response':"accept"}
+        data = {"response": "accept"}
         response = self.client.patch(
-            f"/follow-requests/{self.connection1_id}" , headers={"Authorization": "Token " + self.token2},json=data
+            f"/follow-requests/{self.connection1_id}",
+            headers={"Authorization": "Token " + self.token2},
+            json=data,
         )
         self.assertEqual(response.status_code, 403)
         self.assertTrue("error" in response.json.keys())
-        self.assertTrue("you are not authorised for this follow request!" in response.json.values())
-        
-    def test_follow_request_get_fail_unauthenticated(self):
-        response = self.client.patch(
-            f"/follow-requests/{self.connection1_id}" 
+        self.assertTrue(
+            "you are not authorised for this follow request!" in response.json.values()
         )
+
+    def test_follow_request_get_fail_unauthenticated(self):
+        response = self.client.patch(f"/follow-requests/{self.connection1_id}")
         self.assertEqual(response.status_code, 401)
         self.assertTrue("error" in response.json.keys())
-
 
     def test_follow_request_respond_fail_unauthenticated(self):
         data = {"response": "accept"}
@@ -331,7 +343,7 @@ class TestFollowRequestResponse(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 401)
         self.assertTrue("error" in response.json.keys())
-        
+
     def test_follow_request_respond_fail_unauthorized(self):
         data = {"response": "accept"}
         response = self.client.patch(
@@ -341,7 +353,7 @@ class TestFollowRequestResponse(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 403)
         self.assertTrue("error" in response.json.keys())
-        
+
     def test_follow_request_respond_fail_already_accepted(self):
         data = {"response": "accept"}
         response = self.client.patch(
@@ -352,7 +364,7 @@ class TestFollowRequestResponse(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertTrue("error" in response.json.keys())
         self.assertTrue("you cant do this, already accepted!" in response.json.values())
-        
+
     def test_follow_request_respond_accept_success(self):
         data = {"response": "accept"}
         response = self.client.patch(
@@ -363,15 +375,19 @@ class TestFollowRequestResponse(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue("id" in response.json.keys())
         self.assertTrue("accepted" in response.json.keys())
-        self.assertEqual(response.json['accepted'], True)
-        
+        self.assertEqual(response.json["accepted"], True)
+
         with self.app_test.app_context():
-            connection = Connection.query.filter_by(sender=self.user1_id,receiver=self.user3_id).first() # request sent
-            notification = Notification.query.filter_by(user=self.user1_id).first() # notification made
+            connection = Connection.query.filter_by(
+                sender=self.user1_id, receiver=self.user3_id
+            ).first()  # request sent
+            notification = Notification.query.filter_by(
+                user=self.user1_id
+            ).first()  # notification made
 
             self.assertTrue(connection.id)
             self.assertTrue(notification.id)
-            
+
     def test_follow_request_respond_reject_success(self):
         data = {"response": "reject"}
         response = self.client.patch(
@@ -380,10 +396,14 @@ class TestFollowRequestResponse(unittest.TestCase):
             json=data,
         )
         self.assertEqual(response.status_code, 200)
-        
+
         with self.app_test.app_context():
-            connection = Connection.query.filter_by(sender=self.user1_id,receiver=self.user2_id).first() # request deleted
-            notification = Notification.query.filter_by(user=self.user1_id).first() # notification made
+            connection = Connection.query.filter_by(
+                sender=self.user1_id, receiver=self.user2_id
+            ).first()  # request deleted
+            notification = Notification.query.filter_by(
+                user=self.user1_id
+            ).first()  # notification made
 
             self.assertIsNone(connection)
             self.assertTrue(notification.id)

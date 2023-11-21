@@ -4,6 +4,7 @@ from datetime import datetime as dt
 
 from social_media_application import db
 
+
 class Post(db.Model):
     __tablename__ = "post"
     id = db.Column(
@@ -12,7 +13,7 @@ class Post(db.Model):
         default=uuid.uuid4,
         unique=True,
         nullable=False,
-    ) 
+    )
     creator = db.Column(UUID(as_uuid=True), db.ForeignKey("user.id"))
     title = db.Column(db.String(50))
     url = db.Column(db.String(500), default=None)

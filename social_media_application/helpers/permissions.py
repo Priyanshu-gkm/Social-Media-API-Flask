@@ -44,7 +44,7 @@ def is_owner(f):
             token = auth_header.split(" ")[1]
             username = User.verify_auth_token(token)
             user = User.query.filter_by(username=username).first()
-            if str(user.id) == kwargs.get("id"):
+            if user and str(user.id) == kwargs.get("id"):
                 return f(*args, **kwargs)
             return jsonify({"error": "Unauthorized"}), 403
         except Exception as e:

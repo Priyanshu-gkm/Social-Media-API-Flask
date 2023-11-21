@@ -38,19 +38,20 @@ def get_user_feed(**kwargs):
             .all()
         )
         connections = connections_schema.dump(connections)
-        if len(connections)!=0:
+        if len(connections) != 0:
             users = set()
             for connection in connections:
-                for k, v in connection.items():
-                    if k == "sender" or k == "receiver":
-                        users.add(v)
+                users.add(connection["sender"])
+                users.add(connection["receiver"])
             users.remove(user.username)
-            creators = [User.query.filter_by(username=user).first().id for user in users]
+            creators = [
+                User.query.filter_by(username=user).first().id for user in users
+            ]
             response_object = posts_schema.dump(
                 db.session.query(Post).filter(Post.creator.in_(creators)).all()
             )
         else:
-            response_object=[]
+            response_object = []
         return make_response(jsonify(response_object)), 200
     except Exception as e:
         response_object = {"error": str(e)}

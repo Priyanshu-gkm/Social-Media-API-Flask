@@ -3,6 +3,7 @@ from marshmallow import fields
 from social_media_application import ma
 from social_media_application.models import User
 
+
 class NotificationSchema(ma.Schema):
     user = fields.Method("get_user")
 
