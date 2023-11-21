@@ -29,9 +29,7 @@ def mark_read_notification(id, **kwargs):
         if notification.user == user.id:
             setattr(notification, "read", True)
             db.session.commit()
-            response_object = {
-                "message": "notification mark as read"
-            }
+            response_object = {"message": "notification mark as read"}
             return make_response(jsonify(response_object)), 200
         else:
             response_object = {
@@ -53,9 +51,7 @@ def mark_all_notifications_as_read(**kwargs):
             if notification.user == user.id:
                 setattr(notification, "read", True)
                 db.session.commit()
-        response_object = {
-            "message": "notifications marked as read"
-        }
+        response_object = {"message": "notifications marked as read"}
         return make_response(jsonify(response_object)), 200
     except Exception as e:
         response_object = {"error": str(e)}

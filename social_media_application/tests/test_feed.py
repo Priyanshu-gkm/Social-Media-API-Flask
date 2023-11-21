@@ -195,7 +195,7 @@ class TestFeed(unittest.TestCase):
             "/feed", headers={"Authorization": "Token " + self.token2}
         )
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(type(response.json)==list)
+        self.assertTrue(type(response.json) == list)
         self.assertTrue(self.post2_id not in response.json[0].keys())
 
     def test_get_feed_no_connection_no_feed(self):
@@ -204,5 +204,5 @@ class TestFeed(unittest.TestCase):
         )
         # print(response.json)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(type(response.json)==list)
-        self.assertTrue(len(response.json)==0)
+        self.assertTrue(type(response.json) == list)
+        self.assertTrue(len(response.json) == 0)

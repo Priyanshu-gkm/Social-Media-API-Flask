@@ -12,12 +12,14 @@ def app():
         from social_media_application import views
         from social_media_application import models
         from social_media_application import serializers
+
         db.create_all()
     return app
 
 
 app_test = app()
 client = app_test.test_client()
+
 
 class TestPosts(unittest.TestCase):
     @classmethod
@@ -129,7 +131,7 @@ class TestPosts(unittest.TestCase):
         )
         self.assertTrue("id" in response.json.keys())
         self.post1_id = response.json["id"]
-        self.assertTrue(response.json['post_type']==data['post_type'])
+        self.assertTrue(response.json["post_type"] == data["post_type"])
         self.assertEqual(response.status_code, 201)
 
     def test_create_post_image(self):
@@ -145,7 +147,7 @@ class TestPosts(unittest.TestCase):
         )
         self.assertTrue("id" in response.json.keys())
         self.post2_id = response.json["id"]
-        self.assertTrue(response.json['post_type']==data['post_type'])
+        self.assertTrue(response.json["post_type"] == data["post_type"])
         self.assertEqual(response.status_code, 201)
 
     def test_create_post_fail_invalid_type(self):
@@ -170,12 +172,9 @@ class TestPosts(unittest.TestCase):
             "post_type": "text",
             "tags": "image,hastag,testingtag,user1",
         }
-        response = self.client.post(
-            "/posts", json=data
-        )
+        response = self.client.post("/posts", json=data)
         self.assertEqual(response.status_code, 401)
         self.assertTrue("error" in response.json.keys())
-
 
     def test_get_all_posts(self):
         response = self.client.get(
@@ -183,12 +182,10 @@ class TestPosts(unittest.TestCase):
         )
         # print(response.json)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(type(response.json)==list)
-        
+        self.assertTrue(type(response.json) == list)
+
     def test_get_all_posts_fail_unauthenticated(self):
-        response = self.client.get(
-            "/posts"
-        )
+        response = self.client.get("/posts")
         # print(response.json)
         self.assertEqual(response.status_code, 401)
         self.assertTrue("error" in response.json.keys())
@@ -220,7 +217,7 @@ class TestPosts(unittest.TestCase):
         # print(response.json)
         self.assertEqual(response.status_code, 400)
         self.assertTrue("error" in response.json.keys())
-        
+
     def test_update_post_by_id_fail_invalid_post_type(self):
         data = {"post_type": "updated content"}
         response = self.client.patch(
@@ -231,7 +228,7 @@ class TestPosts(unittest.TestCase):
         # print(response.json)
         self.assertEqual(response.status_code, 400)
         self.assertTrue("error" in response.json.keys())
-        
+
     def test_update_post_by_id_fail_invalid_owner(self):
         data = {"post_type": "updated content"}
         response = self.client.patch(
@@ -242,7 +239,7 @@ class TestPosts(unittest.TestCase):
         # print(response.json)
         self.assertEqual(response.status_code, 403)
         self.assertTrue("error" in response.json.keys())
-        
+
     def test_update_post_by_id_fail_unauthenticated(self):
         data = {"post_type": "updated content"}
         response = self.client.patch(
@@ -254,26 +251,24 @@ class TestPosts(unittest.TestCase):
         self.assertTrue("error" in response.json.keys())
 
     def test_delete_post_fail_unauthenticated(self):
-        response = self.client.delete(
-            f"/posts/{self.post1_id}"
-        )
+        response = self.client.delete(f"/posts/{self.post1_id}")
         self.assertEqual(response.status_code, 401)
         self.assertTrue("error" in response.json.keys())
-        
+
     def test_delete_post_fail_unauthorised(self):
         response = self.client.delete(
             f"/posts/{self.post1_id}", headers={"Authorization": "Token " + self.token2}
         )
         self.assertEqual(response.status_code, 403)
         self.assertTrue("error" in response.json.keys())
-        
+
     def test_delete_post_fail_invalid_post_id(self):
         response = self.client.delete(
             "/posts/some-random-id", headers={"Authorization": "Token " + self.token2}
         )
         self.assertEqual(response.status_code, 400)
         self.assertTrue("error" in response.json.keys())
-        
+
     def test_update_post_delete(self):
         response = self.client.delete(
             f"/posts/{self.post1_id}", headers={"Authorization": "Token " + self.token1}

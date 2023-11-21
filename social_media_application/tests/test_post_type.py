@@ -97,4 +97,4 @@ class TestPostType(unittest.TestCase):
     def test_get_post_type(self):
         response = self.client.get("/post-types")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(type(response.json)==list)
+        self.assertTrue(type(response.json) == list)

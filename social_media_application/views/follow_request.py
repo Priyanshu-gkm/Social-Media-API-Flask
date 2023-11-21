@@ -2,7 +2,7 @@ from flask import request, jsonify, make_response
 from flask import current_app as app
 
 from social_media_application.models import db, User, Connection, Notification
-from social_media_application.serializers import connections_schema , connection_schema
+from social_media_application.serializers import connections_schema, connection_schema
 from social_media_application.helpers.permissions import authenticate_user
 
 
@@ -37,7 +37,7 @@ def follow(**kwargs):
         sender = kwargs.get("current_user")
         req_data = request.get_json()
         user = req_data.get("user")
-        receiver = User.query.filter_by(username=user,archive=False).first()
+        receiver = User.query.filter_by(username=user, archive=False).first()
         if receiver:
             if user == sender.username:
                 response_object = {"error": "You can't send follow request to yourself"}

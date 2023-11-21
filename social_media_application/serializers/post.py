@@ -1,5 +1,6 @@
 from social_media_application import ma
 
+
 class PostSchema(ma.Schema):
     class Meta:
         fields = (
@@ -11,7 +12,7 @@ class PostSchema(ma.Schema):
             "creator",
             "post_type",
             "archive",
-            "tags"
+            "tags",
         )
 
 

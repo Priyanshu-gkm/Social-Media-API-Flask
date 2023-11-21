@@ -55,8 +55,9 @@ def new_user():
     except Exception as e:
         response_object = {"error": str(e)}
         return make_response(jsonify(response_object)), 400
-    
-@app.route("/change-password",methods=['Post'])
+
+
+@app.route("/change-password", methods=["Post"])
 @authenticate_user
 def change_password(**kwargs):
     try:
@@ -70,7 +71,7 @@ def change_password(**kwargs):
                 response_object = {}
                 return make_response(jsonify(response_object)), 200
             else:
-                response_object = {"error":"current password is incorrect"}
+                response_object = {"error": "current password is incorrect"}
                 return make_response(jsonify(response_object)), 400
         else:
             response_object = {"error": "user not found"}
@@ -78,23 +79,23 @@ def change_password(**kwargs):
     except Exception as e:
         response_object = {"error": str(e)}
         return make_response(jsonify(response_object)), 400
-    
-    
-@app.route("/forgot-password",methods=['Post'])
+
+
+@app.route("/forgot-password", methods=["Post"])
 def forgot_password(**kwargs):
     try:
         post_data = request.get_json()
         email = post_data.get("email")
         if email:
             user = User.query.filter_by(email=email).first()
-            if user :
+            if user:
                 user.forget_password_token = uuid.uuid4()
                 db.session.add(user)
                 db.session.commit()
                 response_object = {}
                 return make_response(jsonify(response_object)), 200
             else:
-                response_object = {"error":"No user with this email"}
+                response_object = {"error": "No user with this email"}
                 return make_response(jsonify(response_object)), 400
         else:
             response_object = {"error": "please enter email"}
@@ -102,13 +103,14 @@ def forgot_password(**kwargs):
     except Exception as e:
         response_object = {"error": str(e)}
         return make_response(jsonify(response_object)), 400
-    
-@app.route("/forgot-password/<token>",methods=['Post'])
-def forgot_password_reset(token,**kwargs):
+
+
+@app.route("/forgot-password/<token>", methods=["Post"])
+def forgot_password_reset(token, **kwargs):
     try:
         post_data = request.get_json()
         user = User.query.filter_by(forget_password_token=token).first()
-        if user :
+        if user:
             user.hash_password(post_data.get("new_password"))
             user.forget_password_token = None
             db.session.add(user)

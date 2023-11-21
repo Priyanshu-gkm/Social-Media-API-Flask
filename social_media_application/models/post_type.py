@@ -3,6 +3,7 @@ from sqlalchemy.dialects.postgresql import UUID
 
 from social_media_application import db
 
+
 class PostType(db.Model):
     __tablename__ = "posttype"
     id = db.Column(
@@ -16,5 +17,3 @@ class PostType(db.Model):
 
     def __str__(self) -> str:
         return str(self.name)
-
-

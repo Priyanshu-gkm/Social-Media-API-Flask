@@ -141,7 +141,7 @@ class TestUser(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 403)
         self.assertTrue("error" in response.json.keys())
-        
+
     def test_update_user_fail_invalid_attribute(self):
         update_info = {"fname": "updated_first_name"}
         response = self.client.patch(
@@ -168,7 +168,9 @@ class TestUser(unittest.TestCase):
         # print(response.__dict__)
         self.assertEqual(response.status_code, 204)
         with self.app_test.app_context():
-            self.assertTrue(User.query.filter_by(username=self.username2).first().archive)
+            self.assertTrue(
+                User.query.filter_by(username=self.username2).first().archive
+            )
 
     def test_update_user_delete_fail_other_id(self):
         response = self.client.delete(

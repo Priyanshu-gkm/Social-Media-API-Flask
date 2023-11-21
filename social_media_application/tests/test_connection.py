@@ -12,6 +12,7 @@ def app():
         from social_media_application import views
         from social_media_application import models
         from social_media_application import serializers
+
         db.create_all()
     return app
 
@@ -19,12 +20,13 @@ def app():
 app_test = app()
 client = app_test.test_client()
 
+
 class TestConnection(unittest.TestCase):
     @classmethod
     def setUpClass(self) -> None:
         self.app_test = app_test
         self.client = app_test.test_client()
-        
+
         # user 1 data
         response = self.client.post(
             "/register",
@@ -79,8 +81,8 @@ class TestConnection(unittest.TestCase):
             content_type="application/json",
         )
         self.token2 = response.json["token"]
-        
-        # user 3 data 
+
+        # user 3 data
         response = self.client.post(
             "/register",
             json={
@@ -106,17 +108,19 @@ class TestConnection(unittest.TestCase):
             content_type="application/json",
         )
         self.token3 = response.json["token"]
-        
-        #create connection 
-        #send request
+
+        # create connection
+        # send request
         data = {"user": "testuser2"}
         response = self.client.post(
-            "/follow-requests", headers={"Authorization": "Token " + self.token1}, json=data
+            "/follow-requests",
+            headers={"Authorization": "Token " + self.token1},
+            json=data,
         )
         # print(response.json)
-        self.follow_request_id = response.json['id']
-        
-        #accept request
+        self.follow_request_id = response.json["id"]
+
+        # accept request
         data = {"response": "accept"}
         response = self.client.patch(
             f"/follow-requests/{self.follow_request_id}",
@@ -125,8 +129,6 @@ class TestConnection(unittest.TestCase):
         )
         # print(response.json)
         # self.assertEqual(response.status_code, 200)
-     
-        
 
     @classmethod
     def tearDownClass(self) -> None:
@@ -145,39 +147,37 @@ class TestConnection(unittest.TestCase):
             "/connections", headers={"Authorization": "Token " + self.token1}
         )
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(type(response.json)==list)
-        
+        self.assertTrue(type(response.json) == list)
+
     def test_get_connections_fail_unauthenticated(self):
-        response = self.client.get(
-            "/connections"
-        )
+        response = self.client.get("/connections")
         self.assertEqual(response.status_code, 401)
         self.assertTrue("error" in response.json.keys())
-        
-        
+
     def test_update_connection_delete_fail_unauthenticated(self):
-        response = self.client.delete(
-            f"/connections/{self.follow_request_id}"
-        )
+        response = self.client.delete(f"/connections/{self.follow_request_id}")
         self.assertEqual(response.status_code, 401)
         self.assertTrue("error" in response.json.keys())
-        
+
     def test_update_connection_delete_fail_unauthorised(self):
         response = self.client.delete(
-            f"/connections/{self.follow_request_id}", headers={"Authorization": "Token " + self.token3}
+            f"/connections/{self.follow_request_id}",
+            headers={"Authorization": "Token " + self.token3},
         )
         self.assertEqual(response.status_code, 403)
         self.assertTrue("error" in response.json.keys())
-        
+
     def test_update_connection_delete_fail_wrong_id(self):
         response = self.client.delete(
-            "/connections/some-random-id", headers={"Authorization": "Token " + self.token1}
+            "/connections/some-random-id",
+            headers={"Authorization": "Token " + self.token1},
         )
         self.assertEqual(response.status_code, 400)
         self.assertTrue("error" in response.json.keys())
-        
+
     def test_update_connection_delete_success(self):
         response = self.client.delete(
-            f"/connections/{self.follow_request_id}", headers={"Authorization": "Token " + self.token1}
+            f"/connections/{self.follow_request_id}",
+            headers={"Authorization": "Token " + self.token1},
         )
         self.assertEqual(response.status_code, 204)
