@@ -110,6 +110,7 @@ def forgot_password_reset(token,**kwargs):
         user = User.query.filter_by(forget_password_token=token).first()
         if user :
             user.hash_password(post_data.get("new_password"))
+            user.forget_password_token = None
             db.session.add(user)
             db.session.commit()
             response_object = {}
