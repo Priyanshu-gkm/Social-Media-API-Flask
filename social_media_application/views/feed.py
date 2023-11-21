@@ -41,9 +41,8 @@ def get_user_feed(**kwargs):
         if len(connections)!=0:
             users = set()
             for connection in connections:
-                for k, v in connection.items():
-                    if k == "sender" or k == "receiver":
-                        users.add(v)
+                users.add(connection['sender'])
+                users.add(connection['receiver'])
             users.remove(user.username)
             creators = [User.query.filter_by(username=user).first().id for user in users]
             response_object = posts_schema.dump(

@@ -26,11 +26,6 @@ def mark_read_notification(id, **kwargs):
     try:
         user = kwargs.get("current_user")
         notification = Notification.query.filter_by(id=id).first()
-        if notification==None:
-            response_object = {
-                    "error": "invalid",
-                }
-            return make_response(jsonify(response_object)), 400
         if notification.user == user.id:
             setattr(notification, "read", True)
             db.session.commit()
